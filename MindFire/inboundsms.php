@@ -7,6 +7,13 @@ $OriginatorAddress="";
 $AcceptedTime="";
 $CustomerNickname="";
 
+$check=$_GET['check'];
+if($check=='true')
+{
+echo "Success";
+}
+
+
 if ($_POST) {    
 
 $Message=htmlspecialchars($_POST["Message"]);
@@ -38,8 +45,8 @@ if (strlen($subKey) == 0)
     }
     fclose($f);
 $var="https://studio.afw.mdl.io/api/OutboundApp/AppCallback?serviceTypeId=2019&identifier=". $Identifier."&accountId=". $accountId."&outboundId=0";
-   echo $var;
-studioAPI($var, $contactfieldvalue,$eventid ,$OriginatorAddress);
+echo $var." Step 1";
+studioAPI($var, $contactfieldvalue,$eventid ,$OriginatorAddress,$subKey);
 
 }
 
@@ -52,25 +59,65 @@ else
         if ((strtolower($row[1]) == $Key)&&(strtolower($row[2]) == $subKey)) {
 
 
-   $Identifier = $row[3];
+            $Identifier = $row[3];
             $accountId = $row[4];
 	    $contactfieldvalue = $row[6];
             $eventid = $row[7];
+            $var="https://studio.afw.mdl.io/api/OutboundApp/AppCallback?serviceTypeId=2019&identifier=". $Identifier."&accountId=". $accountId."&outboundId=0";
+            echo $var." Step 2";
+            studioAPI($var, $contactfieldvalue,$eventid ,$OriginatorAddress,$subKey);
             break;
+
         }
-    }
-    fclose($f);
-$var="https://studio.afw.mdl.io/api/OutboundApp/AppCallback?serviceTypeId=2019&identifier=". $Identifier."&accountId=". $accountId."&outboundId=0";
-     echo $var;
-studioAPI($var, $contactfieldvalue,$eventid ,$OriginatorAddress);
+  
+ else if ((strtolower($row[1]) == $Key)&&(strtolower($row[2]) != $subKey)&&(strtolower($row[2]) != "")) {
 
-}
+            $Identifier = $row[3];
+            $accountId = $row[4];
+	    $contactfieldvalue = $row[6];
+            $eventid = $row[7];
+            $var="https://studio.afw.mdl.io/api/OutboundApp/AppCallback?serviceTypeId=2019&identifier=". $Identifier."&accountId=". $accountId."&outboundId=0";
+            echo $var." Step 3";
+            studioAPI($var, $contactfieldvalue,$eventid ,$OriginatorAddress,$subKey);
+            break;
 
-
-}
-
-function studioAPI($var, $contactfieldvalue,$eventid ,$OriginatorAddress)
+        
+  }
+else
 {
+
+}
+
+ } 
+    fclose($f);
+
+}
+
+
+}
+
+function studioAPI($var, $contactfieldvalue,$eventid ,$OriginatorAddress,$subKey)
+{
+
+if($subKey=="thous")
+{
+$eventid="201912";
+}
+
+if($subKey=="wshous")
+{
+$eventid="201913";
+}
+
+if($subKey=="tshous")
+{
+$eventid="201914";
+}
+
+if($subKey=="fhous")
+{
+$eventid="201915";
+}
 
 date_default_timezone_set('America/Los_Angeles');
 $date = date("M d Y H:i:s");
@@ -79,6 +126,7 @@ $payload = json_encode(
   array("request"=>array(  
       "optin"=>$contactfieldvalue,
       "mobile"=>$OriginatorAddress,
+      "uniqueid"=>$subKey,
       "eventid"=> $eventid,
       "date"=>$date,
       "eventoption"=>$OriginatorAddress."-".$Message,
